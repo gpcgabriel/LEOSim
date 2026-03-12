@@ -1,0 +1,54 @@
+datasets/*.json
+!datasets/**/*.gml
+
+__pycache__/
+*.pyc
+*.pyo
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+venv/
+.env/
+.venv/
+ENV/
+env/
+pythonenv/
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+logs/
+*.log
+
+*.tmp
+*.temp
+*.swp
+*.swo
+
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+datasets/*.json
+datasets/*.csv
+datasets/*.pickle
+
+*.png
+*.pdf
+*.svg
