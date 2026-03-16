@@ -31,7 +31,7 @@ def load_topology(ground_topology: str, leo_topology, max_satellites) -> Topolog
     return t
 
 def create_users(num_users: int) -> None:
-    # Coleta coordenadas possíveis
+    # Collect available coordinates from satellite traces
     coordinates_history = [coor for sat in Satellite.all() for coor in sat.coordinates_trace if coor is not None]
 
     for coordinates in choices(coordinates_history, k=num_users):
@@ -71,8 +71,7 @@ def add_process_unit_to_ground_stations(topology, num_process_units: int):
         create_link(unit, station, 10, NetworkLink.default_bandwidth, topology=topology)
         station.process_unit = unit
 
-def configure_mobility_models():
-   
+def configure_mobility_models():   
     for sat in Satellite.all():
         sat.mobility_model = coordinates_history 
         sat.mobility_model_parameters = {'len': len(sat.coordinates_trace)}

@@ -7,35 +7,34 @@ from pathlib import Path
 markers = ['o', 'x', 's', '^', 'D', '*', 'v', '+']
 
 def compare_algorithms_averaged(algorithm_names, scenarios, num_repetitions, current_path):
-    # Gera um conjunto de gráficos para CADA cenário
+    # Generate a set of graphs for each scenario
     for scenario in scenarios:
         print(f"Processando gráficos para o cenário: {scenario}")
         
-        # Dicionários para guardar os dados médios de cada algoritmo
-        # Formato: algo_name -> [valor_step_0, valor_step_1, ...]
+        # Dictionaries to store the average data for each algorithm
+        # Format: alg_name -> [value_step_0, value_step_1, ...]
         avg_steps = {} 
         avg_provisioned = {}
         avg_delay = {}
         avg_not_provisioned = {}
         
         for algo in algorithm_names:
-            # Listas temporárias para acumular dados de todas as repetições
-            # ex: reps_provisioned = [ [prov_rep1_step0, ...], [prov_rep2_step0, ...] ]
+            # Temporary lists to accumulate data from all repetitions
+            # Format: reps_provisioned = [ [prov_rep1_step0, ...], [prov_rep2_step0, ...] ]
             reps_provisioned = []
             reps_delay = []
             reps_not_provisioned = []
             
-            captured_steps = [] # Para guardar o eixo X
+            captured_steps = [] # Store the X-axis
             
             for rep in range(1, num_repetitions + 1):
-                # Caminho: Algo / Scenario / repX / User.jsonl
+                # Path: Algo / Scenario / repX / User.jsonl
                 file_path = os.path.join(current_path, algo, scenario, f"rep{rep}", 'User.jsonl')
                 
                 if not os.path.isfile(file_path):
-                    print(f"  AVISO: Arquivo não encontrado: {file_path}")
+                    print(f"  WARNING: File not found: {file_path}")
                     continue
                 
-                # Leitura do arquivo (lógica original adaptada)
                 curr_steps = []
                 curr_prov = []
                 curr_delay = []
@@ -81,12 +80,12 @@ def compare_algorithms_averaged(algorithm_names, scenarios, num_repetitions, cur
                 if not captured_steps:
                     captured_steps = curr_steps
             
-            # Calcular Médias (se houver dados)
+            # Calculate Averages (if there is data)
             if reps_provisioned:
-                # Determina o tamanho mínimo (caso alguma simulação tenha parado antes)
+                # Determine the minimum length (in case some simulation stopped early)
                 min_len = min(len(r) for r in reps_provisioned)
                 
-                # Função auxiliar para média de lista de listas
+                # Helper function for calculating average of a list of lists
                 def calc_avg(list_of_lists, length):
                     result = []
                     for i in range(length):
@@ -98,8 +97,6 @@ def compare_algorithms_averaged(algorithm_names, scenarios, num_repetitions, cur
                 avg_provisioned[algo] = calc_avg(reps_provisioned, min_len)
                 avg_delay[algo] = calc_avg(reps_delay, min_len)
                 avg_not_provisioned[algo] = calc_avg(reps_not_provisioned, min_len)
-
-        # --- Plotagem ---
         
         # 1. Provisioned Applications
         plt.figure(figsize=(12, 7))
@@ -113,13 +110,13 @@ def compare_algorithms_averaged(algorithm_names, scenarios, num_repetitions, cur
         plt.savefig(os.path.join(current_path, f"provisioned_{scenario}.png"))
         plt.close()
 
-        # 2. Total Delay
+        # 2. Delay
         plt.figure(figsize=(12, 7))
         for i, algo in enumerate(algorithm_names):
             if algo in avg_delay:
                 plt.plot(avg_steps[algo], avg_delay[algo], label=algo, marker=markers[i % len(markers)])
         plt.xlabel('Step', fontsize=15)
-        plt.ylabel('Avg Total Delay', fontsize=15)
+        plt.ylabel('Delay', fontsize=15)
         plt.grid(True)
         plt.legend(fontsize=15)
         plt.savefig(os.path.join(current_path, f"delay_{scenario}.png"))
@@ -138,7 +135,7 @@ def compare_algorithms_averaged(algorithm_names, scenarios, num_repetitions, cur
         plt.close()
 
 def plot_migrations(algorithm_names, scenarios, num_repetitions, current_path):
-    # Gera um conjunto de gráficos para CADA cenário
+    # Generate a set of graphs for each scenario
     for scenario in scenarios:
         print(f"Processando gráficos para o cenário: {scenario}")
 
@@ -147,10 +144,10 @@ def plot_migrations(algorithm_names, scenarios, num_repetitions, current_path):
         
         for alg in algorithm_names:      
             total_migration = []
-            captured_steps = [] # Para guardar o eixo X
+            captured_steps = [] # To store the X-axis
 
             for rep in range(1, num_repetitions + 1):
-                # Caminho: Alg / Scenario / repX / Application.jsonl
+                # Path: Alg / Scenario / repX / Application.jsonl
                 if os.path.isfile(os.path.join(current_path, alg, scenario, f"rep{rep}", 'Application.jsonl')):
                     file_path = os.path.join(current_path, alg, scenario, f"rep{rep}", 'Application.jsonl')
                 
@@ -158,7 +155,7 @@ def plot_migrations(algorithm_names, scenarios, num_repetitions, current_path):
                     file_path = os.path.join(current_path, alg, scenario, 'Application.jsonl')
                 
                 if not os.path.isfile(file_path):
-                    print(f"  AVISO: Arquivo não encontrado: {file_path}")
+                    print(f"  WARNING: File not found: {file_path}")
                     continue
                 
                 curr_steps = []
@@ -184,7 +181,7 @@ def plot_migrations(algorithm_names, scenarios, num_repetitions, current_path):
                 if not captured_steps:
                     captured_steps = curr_steps
 
-            # Calcular Médias (se houver dados)
+            # Calculate averages (if there are repetitions)
             if num_repetitions > 1:
                 min_len = min(len(r) for r in total_migration)
                 
@@ -216,7 +213,7 @@ def plot_migrations(algorithm_names, scenarios, num_repetitions, current_path):
 def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path):
     plot_provisioned_in_topology(algorithm_names, scenarios, num_repetitions, current_path)
     
-    # Buscar topologias
+    # Search topologies
     topologies = [
         p.name for p in Path(current_path).iterdir()
         if p.is_dir() and not p.name.startswith('.') and p.name != '__pycache__'
@@ -224,7 +221,7 @@ def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path)
 
     final_data = {}
 
-    # Estrutura auxiliar para gráficos:
+    # Auxiliar structure for graphics:
     # scenario -> topology -> step -> list(migrations)
     scenario_topology_step = {
         scenario: {} for scenario in scenarios
@@ -251,7 +248,7 @@ def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path)
                     )
 
                     if not os.path.isfile(file_path):
-                        print(f"AVISO: Arquivo não encontrado: {file_path}")
+                        print(f"WARNING: File not found: {file_path}")
                         continue
 
                     curr_steps = []
@@ -283,7 +280,7 @@ def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path)
                 if not total_migration:
                     continue
 
-                # Média por step (algoritmo + repetições)
+                # Avg by step (algorithm + repetitions)
                 if num_repetitions > 1:
                     min_len = min(len(r) for r in total_migration)
                     avg_migrations = [
@@ -295,21 +292,21 @@ def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path)
                     avg_migrations = total_migration[0]
                     steps = captured_steps
 
-                # Salvar no JSON
+                # Save JSON
                 final_data[topology][alg][scenario] = {}
                 for step, avg in zip(steps, avg_migrations):
                     final_data[topology][alg][scenario][str(step)] = {
                         "migrations": avg
                     }
 
-                    # Acumular para o gráfico do cenário
+                    # Acumulate for scenary graphics
                     scenario_topology_step.setdefault(scenario, {})
                     scenario_topology_step[scenario].setdefault(topology, {})
                     scenario_topology_step[scenario][topology].setdefault(step, [])
                     scenario_topology_step[scenario][topology][step].append(avg)
 
     # =========================
-    # Criar JSON temporário
+    # Create a temporary JSON
     # =========================
     temp_file = tempfile.NamedTemporaryFile(
         mode="w",
@@ -355,7 +352,7 @@ def plot_avg_topology(algorithm_names, scenarios, num_repetitions, current_path)
         plot_paths[scenario] = plot_path
 
 def plot_provisioned_in_topology(algorithm_names, scenarios, num_repetitions, current_path):
-    # Buscar topologias
+    # Search topologies
     topologies = [
         p.name for p in Path(current_path).iterdir()
         if p.is_dir() and not p.name.startswith('.') and p.name != '__pycache__'
@@ -414,16 +411,16 @@ def plot_provisioned_in_topology(algorithm_names, scenarios, num_repetitions, cu
                             curr_steps.append(step)
                             curr_provisioned.append(step_provisioned)
 
-                    # Acumular por cenário/topologia/step
+                    # Store by scenario/topology/step
                     for step, prov in zip(curr_steps, curr_provisioned):
                         scenario_topology_step.setdefault(scenario, {})
                         scenario_topology_step[scenario].setdefault(topology, {})
                         scenario_topology_step[scenario][topology].setdefault(step, [])
                         scenario_topology_step[scenario][topology][step].append(prov)
 
-    # =========================
-    # Criar gráficos (1 por cenário)
-    # =========================
+    # ===============================
+    # Create graphs for each scenario
+    # ===============================
     plot_paths = {}
 
     for scenario, topo_data in scenario_topology_step.items():
@@ -460,23 +457,23 @@ def plot_provisioned_in_topology(algorithm_names, scenarios, num_repetitions, cu
 
 def plot_groundstation_links_by_id(algorithm_names, scenarios, num_repetitions, current_path, ground_station_id):
     """
-    Plota a evolução temporal da quantidade de links de uma ground station específica.
-    Para cada cenário, gera um gráfico comparando os algoritmos.
+    Plots the temporal evolution of the number of links for a specific ground station.
+    For each scenario, generates a graph comparing the algorithms.
     """
     for scenario in scenarios:
-        print(f"Processando links da ground station {ground_station_id} para o cenário: {scenario}")
+        print(f"Processing links from ground station {ground_station_id} for scenario: {scenario}")
         
-        avg_links = {}   # algoritmo -> lista de médias por passo
-        avg_steps = {}   # algoritmo -> lista de passos correspondentes
+        avg_links = {}   # algorithm -> list with avg by step
+        avg_steps = {}   # algorithm -> list with corresponding steps
         
         for algo in algorithm_names:
-            reps_links = []       # lista de listas (uma por repetição)
-            captured_steps = []   # passos da primeira repetição (referência)
+            reps_links = []       # list of lists (one per repetition)
+            captured_steps = []   # steps from the first repetition (reference)
             
             for rep in range(1, num_repetitions + 1):
                 file_path = os.path.join(current_path, algo, scenario, f"rep{rep}", 'GroundStation.jsonl')
                 if not os.path.isfile(file_path):
-                    print(f"  AVISO: Arquivo não encontrado: {file_path}")
+                    print(f"  WARNING: File not found: {file_path}")
                     continue
                 
                 curr_steps = []
@@ -485,7 +482,7 @@ def plot_groundstation_links_by_id(algorithm_names, scenarios, num_repetitions, 
                     for line in f:
                         data = json.loads(line)
                         step = data['Step']
-                        # Procura a ground station com o ID desejado
+                        # Search a ground station with the desired ID
                         found = False
                         for gs in data['metrics']:
                             if gs['ID'] == ground_station_id:
@@ -494,22 +491,21 @@ def plot_groundstation_links_by_id(algorithm_names, scenarios, num_repetitions, 
                                 found = True
                                 break
                         if not found:
-                            # Opcional: emitir aviso se a estação não for encontrada em algum passo
-                            print(f"  AVISO: Ground station {ground_station_id} não encontrada no passo {step} do arquivo {file_path}")
+                            # Optional: emit warning if the station is not found in some step
+                            print(f"  WARNING: Ground station {ground_station_id} not found in step {step} of file {file_path}")
                 
                 if curr_links:
                     reps_links.append(curr_links)
                     if not captured_steps:
                         captured_steps = curr_steps
             
-            # Calcula média se houver dados
+            # Calculate averages if there are repetitions
             if reps_links:
                 min_len = min(len(r) for r in reps_links)
                 avg = [sum(r[i] for r in reps_links) / len(reps_links) for i in range(min_len)]
                 avg_links[algo] = avg
                 avg_steps[algo] = captured_steps[:min_len]
         
-        # Geração do gráfico para o cenário atual
         plt.figure(figsize=(12, 7))
         for i, algo in enumerate(algorithm_names):
             if algo in avg_links:

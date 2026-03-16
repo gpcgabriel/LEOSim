@@ -88,7 +88,7 @@ def main(args):
         ComponentManager.save_scenary(filename=dataset_file)
 
         # ======================
-        # Executar simulação
+        # Execute simulation
         # ======================
 
         print(f"  Executando Algoritmo: {args.algorithm}")
