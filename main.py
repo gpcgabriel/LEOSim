@@ -4,6 +4,7 @@ import os
 import random
 import shutil
 import argparse
+from plot import compare_algorithms_averaged, plot_migrations, plot_avg_topology, plot_provisioned_in_topology, plot_groundstation_links_by_id
 
 DATASETS_DIR = "datasets"
 
@@ -23,14 +24,13 @@ def stopping_criterion(model):
     return model.scheduler.steps == args.num_steps
 
 def main(args):
-
     os.makedirs(DATASETS_DIR, exist_ok=True)
 
     algorithm = ALGORITHMS[args.algorithm]
 
     for rep in range(1, args.repetitions + 1):
 
-        print(f"\n--- Repetição {rep}/{args.repetitions} ---")
+        print(f"\n--- Repetition {rep}/{args.repetitions} ---")
 
         current_seed = rep
         total_resources = 0
@@ -43,7 +43,7 @@ def main(args):
         clear_all_components()
         random.seed(current_seed)
 
-        print(f"  Gerando Dataset: {scenario}")
+        print(f"  Generating Dataset: {scenario}")
 
         t = ds.load_topology(
             args.dataset,
@@ -90,8 +90,7 @@ def main(args):
         # ======================
         # Execute simulation
         # ======================
-
-        print(f"  Executando Algoritmo: {args.algorithm}")
+        print(f"  Executing Algorithm: {args.algorithm}")
 
         log_dir = os.path.join(
             args.logs_dir,
@@ -110,15 +109,16 @@ def main(args):
             resource_management_algorithm=algorithm,
             topology_management_algorithm=default_topology_management,
             ignore_list=[
-                NetworkFlow,
-                DynamicDurationAccessModel,
-                FixedDurationAccessModel,
-                NetworkLink,
-                Application,
-                ProcessUnit,
-                Satellite,
-                User,
-                GroundStation,
+                # NetworkFlow,
+                # DynamicDurationAccessModel,
+                # FixedDurationAccessModel,
+                # NetworkLink,
+                # Application,
+                # ProcessUnit,
+                # Satellite,
+                # User,
+                # GroundStation,
+                # Topology
             ],
             clean_data_in_memory=True,
             logs_directory=log_dir
@@ -126,6 +126,14 @@ def main(args):
 
         sim.initialize(dataset_file)
         sim.run()
+
+    # =============
+    # Plot results
+    # =============
+    compare_algorithms_averaged([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    plot_migrations([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    plot_avg_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    plot_provisioned_in_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LEO Simulation Runner")
