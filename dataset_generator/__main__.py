@@ -1,4 +1,4 @@
-from galeos.components import User, GroundStation, ProcessUnit, Satellite
+from leosim.components import User, GroundStation, ProcessUnit, Satellite
 from random import randint
 from time import sleep
 import networkx as nx

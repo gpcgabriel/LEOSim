@@ -1,4 +1,4 @@
-from galeos.components import User,Application, FixedDurationAccessModel,Topology, NetworkLink, Satellite, mesh_network
+from leosim.components import User,Application, FixedDurationAccessModel,Topology, NetworkLink, Satellite, mesh_network
 from json import load
 from random import choices
 from time import sleep

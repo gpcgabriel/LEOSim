@@ -1,4 +1,4 @@
-from galeos import *
+from leosim import *
 from dataset_generator import *
 from random import choices, randint, sample
 

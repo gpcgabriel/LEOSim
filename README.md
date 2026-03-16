@@ -25,7 +25,7 @@ The simulator is centered around the `Simulator` object, which coordinates compo
 #### Basic Usage Example
 You can create a simple script to run a simulation:
 ```python3
-from galeos import *
+from leosim import *
 
 # 1. Define the stopping criterion (e.g., 50 steps)
 def stopping_criterion(model):
@@ -62,18 +62,18 @@ python main.py \
 ```
 
 ## 🏗️ Project Structure
-- `galeos/`: Core of the simulator, containing the simulation engine (simulator.py) and the scheduler (scheduler.py).
+- `leosim/`: Core of the simulator, containing the simulation engine (simulator.py) and the scheduler (scheduler.py).
 
-- `galeos/components/`: Definitions of system agents such as Satellite, User, GroundStation, and ProcessUnit.
+- `leosim/components/`: Definitions of system agents such as Satellite, User, GroundStation, and ProcessUnit.
 
-- `galeos/components/allocation_algorithms/`: Implementations of allocation strategies (e.g., Best Fit, Random, Simple).
+- `leosim/components/allocation_algorithms/`: Implementations of allocation strategies (e.g., Best Fit, Random, Simple).
 
 - `datasets/`: Topology files (GML) and pre-configured scenarios.
 
 - `main.py`: Main script for running large-scale experiments with multiple repetitions and scenarios`.
 
 ## 📊 Data Collection and Results
-#### GALEOS automatically generates log files in `.jsonl` format within the specified directory.
+#### leosim automatically generates log files in `.jsonl` format within the specified directory.
 
 - Each component class (e.g., `Satellite`, `User`) generates its own metrics file.
 

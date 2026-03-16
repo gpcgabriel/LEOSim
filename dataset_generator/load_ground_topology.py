@@ -1,4 +1,4 @@
-from galeos.components import GroundStation, NetworkLink, Topology
+from leosim.components import GroundStation, NetworkLink, Topology
 from .create_components import MAX_RANGE
 import networkx as nx
 
