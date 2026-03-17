@@ -519,10 +519,10 @@ def plot_groundstation_links_by_id(
 
             if reps_links:
 
-                avg_links[algo] = calculate_average(reps_links)
+                avg_links[alg] = calculate_average(reps_links)
 
-                min_len = len(avg_links[algo])
-                avg_steps[algo] = captured_steps[:min_len]
+                min_len = len(avg_links[alg])
+                avg_steps[alg] = captured_steps[:min_len]
 
         plot(
             avg_links,
@@ -532,3 +532,80 @@ def plot_groundstation_links_by_id(
             f"gs_{ground_station_id}_links_{scenario}.png",
             current_path
         )
+
+# ==========================================================
+# GROUND STATION DELAY
+# ==========================================================
+def plot_delay_by_groundstation(algorithm_names, scenarios, num_repetitions, current_path, ground_station_id):
+    for scenario in scenarios:
+        print(f"Processing delay for GS {ground_station_id} - scenario: {scenario}")
+
+        avg_delay = {}
+        avg_steps = {}
+
+        for alg in algorithm_names:
+
+            reps_delay = []
+            captured_steps = []
+
+            for rep in range(1, num_repetitions + 1):
+
+                if num_repetitions == 1:
+                    file_path = build_path(
+                        current_path,
+                        alg,
+                        scenario,
+                        "User.jsonl"
+                    )
+                else:
+                    file_path = build_path(
+                        current_path,
+                        alg,
+                        scenario,
+                        "User.jsonl",
+                        rep
+                    )
+
+                if not os.path.isfile(file_path):
+                    continue
+
+                curr_steps = []
+                curr_delay = []
+
+                for data in read_jsonl(file_path):
+
+                    step = data["Step"]
+                    step_delay = 0
+
+                    for metric in data["metrics"]:
+
+                        # Filtra apenas usuários conectados à GS desejada
+                        if f"GroundStation_{ground_station_id}" not in metric.get("Network Access Points", []):
+                            continue
+
+                        current = metric["Access to Applications"][0]
+
+                        if current["Is Provisioned"] or current.get("Provisioning"):
+
+                            d = current.get("Delay", 0)
+
+                            if d != float("inf") and d is not None:
+                                step_delay += d
+
+                    curr_steps.append(step)
+                    curr_delay.append(step_delay)
+
+                if curr_delay:
+                    reps_delay.append(curr_delay)
+
+                    if not captured_steps:
+                        captured_steps = curr_steps
+
+            if reps_delay:
+
+                avg_delay[alg] = calculate_average(reps_delay)
+
+                min_len = len(avg_delay[alg])
+                avg_steps[alg] = captured_steps[:min_len]
+
+        plot(avg_delay, avg_steps, "Step", f"Delay (GS {ground_station_id})", f"delay_gs_{ground_station_id}_{scenario}.png", current_path)

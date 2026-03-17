@@ -4,7 +4,14 @@ import os
 import random
 import shutil
 import argparse
-from plot import compare_algorithms_averaged, plot_migrations, plot_avg_topology, plot_provisioned_in_topology, plot_groundstation_links_by_id
+from plot import (
+    compare_algorithms_averaged,
+    plot_migrations,
+    plot_avg_topology,
+    plot_provisioned_in_topology,
+    plot_groundstation_links_by_id,
+    plot_delay_by_groundstation
+)
 
 DATASETS_DIR = "datasets"
 
@@ -134,6 +141,7 @@ def main(args):
     plot_migrations([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
     plot_avg_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
     plot_provisioned_in_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    plot_delay_by_groundstation([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir, ground_station_id=1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LEO Simulation Runner")
