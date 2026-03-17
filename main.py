@@ -10,7 +10,8 @@ from plot import (
     plot_avg_topology,
     plot_provisioned_in_topology,
     plot_groundstation_links_by_id,
-    plot_delay_by_groundstation
+    plot_delay_by_groundstation,
+    plot_avg_resource_consumption
 )
 
 DATASETS_DIR = "datasets"
@@ -137,11 +138,12 @@ def main(args):
     # =============
     # Plot results
     # =============
-    compare_algorithms_averaged([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
-    plot_migrations([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
-    plot_avg_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
-    plot_provisioned_in_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
-    plot_delay_by_groundstation([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir, ground_station_id=1)
+    # compare_algorithms_averaged([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    # plot_migrations([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    # plot_avg_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    # plot_provisioned_in_topology([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
+    # plot_delay_by_groundstation([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir, ground_station_id=1)
+    plot_avg_resource_consumption([args.algorithm], [str(args.scenario)], args.repetitions, args.logs_dir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="LEO Simulation Runner")

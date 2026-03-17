@@ -579,7 +579,7 @@ def plot_delay_by_groundstation(algorithm_names, scenarios, num_repetitions, cur
 
                     for metric in data["metrics"]:
 
-                        # Filtra apenas usuários conectados à GS desejada
+                        # Filter only users connected to the desired GS
                         if f"GroundStation_{ground_station_id}" not in metric.get("Network Access Points", []):
                             continue
 
@@ -609,3 +609,93 @@ def plot_delay_by_groundstation(algorithm_names, scenarios, num_repetitions, cur
                 avg_steps[alg] = captured_steps[:min_len]
 
         plot(avg_delay, avg_steps, "Step", f"Delay (GS {ground_station_id})", f"delay_gs_{ground_station_id}_{scenario}.png", current_path)
+
+# ==========================================================
+# RESOURCE CONSUMPTION (APPLICATION LEVEL)
+# ==========================================================
+def plot_avg_resource_consumption(algorithm_names, scenarios, num_repetitions, current_path):
+    for scenario in scenarios:
+        print(f"Processing resource consumption - scenario: {scenario}")
+        avg_cpu = {}
+        avg_mem = {}
+        avg_steps = {}
+
+        for alg in algorithm_names:
+            reps_cpu = []
+            reps_mem = []
+            captured_steps = []
+
+            for rep in range(1, num_repetitions + 1):
+                if num_repetitions == 1:
+                    file_path = build_path(
+                        current_path,
+                        alg,
+                        scenario,
+                        "Application.jsonl"
+                    )
+                else:
+                    file_path = build_path(
+                        current_path,
+                        alg,
+                        scenario,
+                        "Application.jsonl",
+                        rep
+                    )
+
+                if not os.path.isfile(file_path):
+                    continue
+
+                cpu_sum = {}
+                mem_sum = {}
+                count_apps = {}
+
+                for data in read_jsonl(file_path):
+
+                    step = data["Step"]
+
+                    cpu_sum.setdefault(step, 0)
+                    mem_sum.setdefault(step, 0)
+                    count_apps.setdefault(step, 0)
+
+                    for metric in data["metrics"]:
+
+                        if metric.get("Process Unit") and metric.get("Available"):
+
+                            cpu_sum[step] += metric.get("CPU Demand", 0)
+                            mem_sum[step] += metric.get("Memory Demand", 0)
+                            count_apps[step] += 1
+
+                if cpu_sum:
+
+                    steps = sorted(cpu_sum.keys())
+
+                    curr_cpu = []
+                    curr_mem = []
+
+                    for step in steps:
+
+                        if count_apps[step] > 0:
+                            curr_cpu.append(cpu_sum[step] / count_apps[step])
+                            curr_mem.append(mem_sum[step] / count_apps[step])
+                        else:
+                            curr_cpu.append(0)
+                            curr_mem.append(0)
+
+                    reps_cpu.append(curr_cpu)
+                    reps_mem.append(curr_mem)
+
+                    if not captured_steps:
+                        captured_steps = steps
+
+            if reps_cpu:
+
+                avg_cpu[alg] = calculate_average(reps_cpu)
+                avg_mem[alg] = calculate_average(reps_mem)
+
+                min_len = len(avg_cpu[alg])
+                avg_steps[alg] = captured_steps[:min_len]
+
+        # Plot CPU
+        plot(avg_cpu, avg_steps, "Step", "Avg CPU Consumption per Application", f"avg_cpu_{scenario}.png", current_path)
+        # Plot memory
+        plot(avg_mem, avg_steps, "Step", "Avg Memory Consumption per Application", f"avg_memory_{scenario}.png", current_path)
