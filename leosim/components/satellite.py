@@ -18,7 +18,8 @@ class Satellite(ComponentManager):
             coordinates : tuple = None,
             wireless_delay : int = 0,
             max_connection_range : int = 300,
-            is_gateway : bool = False
+            is_gateway : bool = False,
+            failure_step : int = None
         ) -> object: 
         self.__class__._instances.append(self)
         self.__class__._object_count += 1
@@ -55,6 +56,7 @@ class Satellite(ComponentManager):
         self.failure_model = None
         self.failure_occurred = False
         self.failure_model_parameters = {}
+        self.failure_step = failure_step
         
     def collect_metrics(self) -> dict:
         metrics = {

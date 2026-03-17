@@ -2,6 +2,7 @@
 from .components import*
 from .scheduler import*
 import json
+import random
 
 # Python modules
 from typing import Callable
@@ -77,12 +78,18 @@ class Simulator(ComponentManager):
         
         ComponentManager.model = self
 
+        self.satellite_failures = {}
         self.host_metrics = []
         self.scenario = scenario
         self.repetition = repetition
         self.topology_name = topology_name
 
-    def initialize(self, dataset : str):
+        """"
+        For testing purposes, we can set specific failure steps for satellites or enable random failures
+        """
+        self.random_failures = False
+
+    def initialize(self, dataset : str) -> None:
         for component_class in ComponentManager.__subclasses__():
             if component_class.__name__ != "Simulator":
                 globals()[component_class.__name__].clear()
@@ -155,9 +162,37 @@ class Simulator(ComponentManager):
                 if component_class.__name__ not in self.agent_metrics:
                     self.agent_metrics[component_class.__name__] = []
                     
-    def modelo_falha_programada(self, satellite):
-        pass
-         
+    def register_failure(self) -> None:
+        with open('logs/failures.json', 'w', encoding='utf-8') as f:
+            json.dump(self.satellite_failures, f, indent=4)
+
+    def mark_failure(self, satellite) -> None:
+        if self.scheduler.steps in self.satellite_failures:
+            self.satellite_failures[self.scheduler.steps].append(satellite.id)
+        else:
+            self.satellite_failures[self.scheduler.steps] = [satellite.id]
+
+    def check_failure(self, satellite) -> bool:        
+        if satellite.failure_occurred:
+            self.mark_failure(satellite)
+            return True
+        
+        if satellite.failure_step: 
+            if self.scheduler.steps >= satellite.failure_step:
+                self.mark_failure(satellite)
+                return True
+            else:
+                return False
+
+        elif not self.random_failures:
+            return False
+        
+        if random.randint(0, 100) == 42:
+            self.mark_failure(satellite)
+            return True
+        
+        return False
+
     def step(self) -> None:
         # Updating satellite networks
         self.scheduler.step()
@@ -199,7 +234,7 @@ class Simulator(ComponentManager):
         # Execute the model
         
         for sat in Satellite.all():
-            sat.failure_model = self.modelo_falha_programada
+            sat.failure_model = self.check_failure
 
         self.running = True
         
@@ -215,4 +250,5 @@ class Simulator(ComponentManager):
             
             self.running = False if self.stopping_criterion(self) else True
             
+        self.register_failure()
         self.dump_data()

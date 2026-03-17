@@ -14,10 +14,11 @@ def load_topology(ground_topology: str, leo_topology, max_satellites) -> Topolog
     )
 
     for sat in Satellite.all():
-        sat.is_gateway = False
-
-    for sat in sample(Satellite.all(), Satellite.count()):
         sat.is_gateway = True
+
+    # To control the number of gateways
+    # for sat in sample(Satellite.all(), Satellite.count()):
+    #     sat.is_gateway = True
 
     for station in GroundStation.all():
         for sat in Satellite.all():
