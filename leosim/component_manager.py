@@ -83,10 +83,9 @@ class ComponentManager:
         from .simulator import Simulator, Topology
         
         scenary = {}
-        ignore_list += [Simulator, Topology]
         
         for component_class in cls.__subclasses__():
-            if component_class.__name__ not in ignore_list + ['Simulator', 'Topology', 'Network']:
+            if component_class not in ignore_list + [Simulator, Topology]:
                 components = []
                 
                 for component in component_class.all():

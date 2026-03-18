@@ -1,24 +1,54 @@
 from ..component_manager import ComponentManager
+from typing import List, Dict, Any, Optional, Tuple
 
 class ProcessUnit(ComponentManager):
-    """ 
-        Class that represents an infrastructure component with any computational capabilities (e.g. datacenters, edge servers).
-        Additionally, it interacts with other components through the Topology component, which means a ProcessUnit must be properly
-        integrated into the topology structure.
+    """Represents an infrastructure component with computational capabilities.
+
+    This class models hardware such as datacenters or edge servers. It 
+    interacts with other elements through the Topology component, 
+    requiring proper integration into the simulation's network structure.
+
+    Attributes:
+        _instances (list): List of all active ProcessUnit instances.
+        _object_count (int): Counter for generating unique identifiers.
+        id (int): Unique identifier for the process unit.
+        model_name (str): Name or label of the hardware model.
+        coordinates (tuple): Geographical position (lat, lon, alt).
+        cpu (int): Total CPU capacity.
+        memory (int): Total RAM capacity.
+        storage (int): Total storage capacity.
+        power (float): Current power state or generation.
+        cpu_demand (int): Currently allocated CPU resources.
+        memory_demand (int): Currently allocated RAM resources.
+        storage_demand (int): Currently allocated storage resources.
+        architecture (dict): Hardware architectural specifications.
+        applications (List[object]): Applications currently hosted on this unit.
+        available (bool): Status indicating if the unit is functional.
     """
     _instances = []
     _object_count = 0
    
     def __init__(
             self,
-            id : int = 0,
-            cpu : int = 0,
-            memory : int = 0,
-            storage : int = 0,
-            coordinates : tuple = None,
-            model_name : str = "",
-            architecture : dict = {}
-        ):     
+            id: int = 0,
+            cpu: int = 0,
+            memory: int = 0,
+            storage: int = 0,
+            coordinates: Optional[Tuple[float, float, float]] = None,
+            model_name: str = "",
+            architecture: Dict[str, Any] = {}
+        ):
+        """Initializes a ProcessUnit instance.
+
+        Args:
+            id (int): Unique ID. If 0, it is automatically assigned.
+            cpu (int): CPU capacity units.
+            memory (int): Memory capacity units.
+            storage (int): Storage capacity units.
+            coordinates (tuple, optional): Latitude, longitude, and altitude.
+            model_name (str): Label for the hardware model.
+            architecture (dict): Specific hardware architectural demands.
+        """     
         self.__class__._instances.append(self)
         self.__class__._object_count += 1
         
@@ -60,68 +90,82 @@ class ProcessUnit(ComponentManager):
         self.available = True
 
     def collect_metrics(self) -> dict:
-        """ 
-            Method that collects data from a specific instance
-            Can be modified for customized data collection
+        """Collects telemetry data from the specific process unit instance.
+
+        Returns:
+            dict: Current resource capacity, demands, and operational status.
         """
         metrics = {
-            "ID" : self.id,
-            "Coordinates" : self.coordinates,
-            "CPU" : self.cpu,
-            "Memory" : self.memory,
-            "Storage" : self.storage,
-            "CPU Demand" : self.cpu_demand,
-            "Memory Demand" : self.memory_demand,
-            "Storage Demand" : self.storage_demand,
-            "Power" : self.power,
-            "Available" : self.available,
-            "Architecture" : self.architecture
+            "ID": self.id,
+            "Coordinates": self.coordinates,
+            "CPU": self.cpu,
+            "Memory": self.memory,
+            "Storage": self.storage,
+            "CPU Demand": self.cpu_demand,
+            "Memory Demand": self.memory_demand,
+            "Storage Demand": self.storage_demand,
+            "Power": self.power,
+            "Available": self.available,
+            "Architecture": self.architecture
         }
         
         return metrics
     
-    def step(self):
-        # Method responsible for activating the component and ensuring its correct operation throughout the simulation
-        
-        # Updates the status of applications already allocated and which became unavailable for various reasons
+    def step(self) -> None:
+        """Activates the component and ensures its operation during the simulation.
+
+        Updates the status of allocated applications. If the unit becomes 
+        unavailable, hosted applications are deprovisioned.
+        """
+        # Updates the status of applications already allocated and which became 
+        # unavailable for various reasons
         for app in self.applications:
             if app.process_unit and not app.process_unit.available:
                 app.available = False
                 app.deprovision()
       
     def export(self) -> dict:
-        """ Method that generates a representation of the object in dictionary format to save current context
+        """Generates a dictionary representation for saving the current context.
+
+        Returns:
+            dict: Serialized object state including hardware specs and 
+                application relationships.
         """
         component = {
-            "id" : self.id,
-            "cpu" : self.cpu,
-            "memory" : self.memory,
-            "storage" : self.storage,
-            "power" : self.power,
-            "model_name" : self.model_name,
-            "architecture" : self.architecture,
-            "coordinates" : self.coordinates,
-            "available" : self.available,
-            "power_generation_model_parameters" : self.power_generation_model_parameters,
-            "power_consumption_model_parameters" :self.power_consumption_model_parameters,
-            "relationships" :{
-                "power_generation_model" : self.power_generation_model.__name__ if self.power_generation_model else None,
-                "power_consumption_model" : self.power_consumption_model.__name__ if self.power_consumption_model else None,
-                "failure_model" : self.failure_model.__name__ if self.failure_model else None,
-                "applications" : [
+            "id": self.id,
+            "cpu": self.cpu,
+            "memory": self.memory,
+            "storage": self.storage,
+            "power": self.power,
+            "model_name": self.model_name,
+            "architecture": self.architecture,
+            "coordinates": self.coordinates,
+            "available": self.available,
+            "power_generation_model_parameters": self.power_generation_model_parameters,
+            "power_consumption_model_parameters": self.power_consumption_model_parameters,
+            "relationships": {
+                "power_generation_model": self.power_generation_model.__name__ if self.power_generation_model else None,
+                "power_consumption_model": self.power_consumption_model.__name__ if self.power_consumption_model else None,
+                "failure_model": self.failure_model.__name__ if self.failure_model else None,
+                "applications": [
                     {
-                        "class" : type(app).__name__,
-                        "id" : app.id
+                        "class": type(app).__name__,
+                        "id": app.id
                     } for app in self.applications
                 ]
-                
             }
         } 
         
         return component
     
-    def has_capacity_to_host(self, application : object) -> None:
-        """ Method that checks whether there are enough available resources to host an application
+    def has_capacity_to_host(self, application: object) -> bool:
+        """Checks if there are enough available resources to host an application.
+
+        Args:
+            application (object): The application instance requesting resources.
+
+        Returns:
+            bool: True if CPU, memory, and storage demands can be met.
         """
         cpu_demand = self.cpu_demand + application.cpu_demand
         memory_demand = self.memory_demand + application.memory_demand

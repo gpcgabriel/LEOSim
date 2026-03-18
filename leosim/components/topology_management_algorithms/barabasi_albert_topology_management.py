@@ -32,12 +32,18 @@ def barabasi_albert_network(topology, min_num_links : int = 2):
 
         
         for target in selected_targets:
-            NetworkLink(satellite, target)
+            link = NetworkLink(satellite, target)
+            
+            link['topology'] = topology
+            link['nodes'] = [satellite, target]
+            link['bandwidth'] = NetworkLink.default_bandwidth
+            link['delay'] = NetworkLink.get_delay()
+            link['type'] = 'dynamic'
             
             topology.add_edge(satellite, target)
             
-            topology._adj[satellite][target]
-            topology._adj[target][satellite]
+            topology._adj[satellite][target] = link
+            topology._adj[target][satellite] = link
             
 def barabasi_albert_topology_management(topology : object, **parameters):
     barabasi_albert_network(

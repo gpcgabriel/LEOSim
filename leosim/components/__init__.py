@@ -11,3 +11,4 @@ from .satellite import*
 from .user import*
 from .topology import*
 from .topology_management_algorithms import*
+from .failure_models import deterministic_failure_model, random_failure_model

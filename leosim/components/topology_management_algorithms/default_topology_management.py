@@ -16,7 +16,7 @@ def mesh_network(topology):
             link['topology'] = topology
             link['nodes'] = [satellite, target]
             link['bandwidth'] = NetworkLink.default_bandwidth
-            link['delay'] = NetworkLink.get_delay(satellite.coordinates, target.coordinates)
+            link['delay'] = link.get_delay()
             link['type'] = 'dynamic'
             
             topology.add_edge(satellite, target)

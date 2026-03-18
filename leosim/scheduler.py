@@ -2,7 +2,7 @@ from .components.application import*
 from .components.ground_station import*
 from .components.topology import*
 from .components.user import*
-
+        
 
 class Scheduler:
     """ Class responsible for scaling simulator components
@@ -23,10 +23,10 @@ class Scheduler:
             
         for flow in NetworkFlow.all():
             flow.step()
-        
+
         for user in User.all():
             user.step()
-            
+
         for satellite in Satellite.all():
             satellite.step()
         
