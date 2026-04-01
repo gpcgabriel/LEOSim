@@ -37,7 +37,7 @@ class NetworkLink(ComponentManager, dict):
         if id == 0: 
             id = self.__class__._object_count
         self["id"] = id
-        self["topology"] = self.__class__.model.topology
+        self["topology"] = None
         self["nodes"] = []
         self["delay"] = 0
         self["bandwidth"] = 0
